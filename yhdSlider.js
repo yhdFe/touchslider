@@ -425,7 +425,6 @@
             }
 
             if (typeof offset == 'undefined')offset = 1;
-
             if (index === len - 1) {
             } else {
                 index += offset;
