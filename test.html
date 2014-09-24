@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        * {
+            padding: 0;
+            border: none;
+            margin: 0;
+            list-style: none;
+        }
+
+        .swipe li {
+            text-align: center;
+        }
+
+        .swipe li img {
+            width: 558px;
+            height: 235px;
+        }
+
+        button {
+            width: 100px;
+            height: 30px;
+        }
+
+        .ml100 a {
+            display: inline-block;
+            width: 100px;
+            height: 30px;
+        }
+
+        .ml100 {
+            margin-left: 100px;
+        }
+    </style>
+
+</head>
+<body>
+
+<h2 class="ml100">Full-width 类型：容器宽度自适应，幻灯宽度固定</h2>
+<br/>
+
+<div class='swipe' style="height:235px;">
+    <ul id='slider'>
+        <li style='display:block;background-color:#31DD76;'>
+            <a href="http://www.baidu.com/#1">
+                <img src="http://tvvt.qiniudn.com/slider1.jpg" alt=""/>
+            </a>
+        </li>
+        <li style='display:none;background-color:#1A33E0;'>
+            <a href="http://www.baidu.com/#2">
+                <img src="http://tvvt.qiniudn.com/slider2.jpg" alt=""/>
+            </a>
+        </li>
+        <li style='display:none;background-color:#D5E617;'>
+            <a href="http://www.baidu.com/#3">
+                <img src="http://tvvt.qiniudn.com/slider3.jpg" alt=""/>
+            </a>
+        </li>
+        <li style='display:none;background-color:#0C0E1B;'>
+            <a href="http://www.baidu.com/#4">
+                <img src="http://tvvt.qiniudn.com/slider4.jpg" alt=""/>
+            </a>
+        </li>
+    </ul>
+</div>
+<br/>
+
+<div class="ml100">页码实现方式一(未加状态标识)：
+    <a href="#" onclick="t.slide(0);return false;"> 1 </a>
+    <a href="#" onclick="t.slide(1);return false;"> 2 </a>
+    <a href="#" onclick="t.slide(2);return false;"> 3 </a>
+    <a href="#" onclick="t.slide(3);return false;"> 4 </a>
+</div>
+<br/>
+<button class="ml100" onclick="t.pause();">暂停</button>
+<button onclick="t.play();">播放</button>
+<button onclick="t.prev();">上一张</button>
+<button onclick="t.next();">下一张</button>
+<script src="yhdSlider.js"></script>
+<script>
+    var t = new TouchSlider('slider', {speed: 200, timeout: 3000})
+</script>
+</body>
+</html>
