@@ -460,25 +460,28 @@
                 var copyItem = null;
                 var insertItem = null;
                 offset = offset / ((!this.index && offset > 0 || this.index == this.length - 1 && offset < 0) ? (Math.abs(offset) / this[type] + 1) : 1);
-                if (this.index === 0) {
+                if (!this.tempCreate && this.index === 0) {
+                    this.tempCreate = true;
                     copyItem = this.slides[len - 1];
                     insertItem = this.slides[0];
                     this.element.removeChild(copyItem);
                     this.element.insertBefore(copyItem, insertItem);
-                    this.element.style[this.cfg.direction] = -this.getOuterWidth(copyItem) + 'px';
-                    this.element.style[direction] = this._pos - this.getOuterWidth(copyItem) + offset + 'px';
-                } else if (this.index === len - 1) {
+                    this.refresh();
+                    this._pos = -this.getOuterWidth(copyItem);
+                } else if (!this.tempCreate&&(this.index === len - 1)) {
+                    this.tempCreate = true;
                     copyItem = this.slides[0];
                     insertItem = this.slides[len - 1];
                     this.element.removeChild(copyItem);
                     this.element.appendChild(copyItem, insertItem);
-                    this.refresh();
                     var tempPos = parseInt(this.element.style[this.cfg.direction], 10);
-                    this.element.style[this.cfg.direction] = (tempPos + this.getOuterWidth(copyItem)) + 'px';
-                    this.element.style[direction] = this._pos + this.getOuterWidth(copyItem) + offset + 'px';
-                } else {
-                    this.element.style[direction] = this._pos + offset + 'px';
+                    this.refresh();
+                    this._pos = tempPos + this.getOuterWidth(copyItem);
                 }
+
+                this.element.style[direction] = this._pos + offset + 'px';
+
+
 
                 if (window.getSelection != null) {
                     range = window.getSelection();
@@ -495,6 +498,7 @@
         _end: function () {
             if (this.startPos) {
                 if (this.scrolling) {
+                    this.tempCreate = false;
                     var type = sg[this.vertical][0],
                     //direction=sg[this.vertical][1],
                         offset = this.stopPos[this.vertical] - this.startPos[this.vertical],
@@ -519,7 +523,7 @@
                             off = 1;
                         }
                     }
-                    offset > 0 ? this.prev(off, false) : this.next(off, false);
+                    offset > 0 ? this.prev(off, false, true) : this.next(off, false, true);
 
                     this.playing && this.play();
                 }
