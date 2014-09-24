@@ -501,7 +501,7 @@
                             off = 1;
                         }
                     }
-                    offset > 0 ? this.prev(off, true) : this.next(off, false);
+                    offset > 0 ? this.prev(off, false) : this.next(off, false);
 
                     this.playing && this.play();
                 }
