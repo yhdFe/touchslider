@@ -369,8 +369,8 @@
             this.pause();
             return this.slide(0);
         },
-        prev: function (offset, sync) {
-            if(this.animateLock){
+        prev: function (offset, sync, istouch) {
+            if (this.animateLock) {
                 return;
             }
             clearTimeout(this.timer);
@@ -378,7 +378,7 @@
             var len = this.slides.length;
             var copyItem = null;
             var insertItem = null;
-            if (index === 0) {
+            if (!istouch && index === 0) {
                 copyItem = this.slides[len - 1];
                 insertItem = this.slides[0];
                 this.element.removeChild(copyItem);
@@ -405,8 +405,8 @@
 
             return this.slide(index);
         },
-        next: function (offset, sync) {
-            if(this.animateLock){
+        next: function (offset, sync, istouch) {
+            if (this.animateLock) {
                 return;
             }
             clearTimeout(this.timer);
@@ -414,7 +414,7 @@
             var len = this.slides.length;
             var copyItem = null;
             var insertItem = null;
-            if (index === len - 1) {
+            if (!istouch && index === len - 1) {
                 copyItem = this.slides[0];
                 insertItem = this.slides[len - 1];
                 this.element.removeChild(copyItem);
@@ -422,10 +422,7 @@
                 this.refresh();
                 var tempPos = parseInt(this.element.style[this.cfg.direction], 10);
                 this.element.style[this.cfg.direction] = (tempPos + this.getOuterWidth(copyItem)) + 'px';
-            } else {
-                this.btnFlag = false;
             }
-
 
             if (typeof offset == 'undefined')offset = 1;
 
@@ -460,8 +457,30 @@
                 offset = this.stopPos[this.vertical] - this.startPos[this.vertical];
             if (this.scrolling || typeof this.scrolling == 'undefined' && Math.abs(offset) >= Math.abs(this.stopPos[1 - this.vertical] - this.startPos[1 - this.vertical])) {
                 evt.preventDefault();
+                var len = this.slides.length;
+                var copyItem = null;
+                var insertItem = null;
                 offset = offset / ((!this.index && offset > 0 || this.index == this.length - 1 && offset < 0) ? (Math.abs(offset) / this[type] + 1) : 1);
-                this.element.style[direction] = this._pos + offset + 'px';
+                if (this.index === 0) {
+                    copyItem = this.slides[len - 1];
+                    insertItem = this.slides[0];
+                    this.element.removeChild(copyItem);
+                    this.element.insertBefore(copyItem, insertItem);
+                    this.element.style[this.cfg.direction] = -this.getOuterWidth(copyItem) + 'px';
+                    this.element.style[direction] = this._pos - this.getOuterWidth(copyItem) + offset + 'px';
+                } else if (this.index === len - 1) {
+                    copyItem = this.slides[0];
+                    insertItem = this.slides[len - 1];
+                    this.element.removeChild(copyItem);
+                    this.element.appendChild(copyItem, insertItem);
+                    this.refresh();
+                    var tempPos = parseInt(this.element.style[this.cfg.direction], 10);
+                    this.element.style[this.cfg.direction] = (tempPos + this.getOuterWidth(copyItem)) + 'px';
+                    this.element.style[direction] = this._pos + this.getOuterWidth(copyItem) + offset + 'px';
+                } else {
+                    this.element.style[direction] = this._pos + offset + 'px';
+                }
+
                 if (window.getSelection != null) {
                     range = window.getSelection();
                     if (range.empty)range.empty();
