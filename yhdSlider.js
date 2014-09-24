@@ -262,12 +262,15 @@
             for (; i < end; i++) {
                 sum += this['getOuter' + _type](this.slides[i]);
             }
+
+
             return sum;
         },
         getPos: function (type, index) {
             var _type = toCase('-' + type),
                 myWidth = this.getSum(type, index, index + 1),
                 sum = this.getSum(type, 0, index) + this['getOuter' + _type](this.element) / 2 - this['get' + _type](this.element) / 2;
+
             switch (this.cfg.align) {
                 case 'left':
                     return -sum;
@@ -306,6 +309,7 @@
             return this;
         },
         slide: function (index, speed) {
+            this.animateLock = true;
             var direction = sg[this.vertical][1],
                 type = sg[this.vertical][0],
                 transition = testCSS('transition'),
@@ -314,8 +318,11 @@
             index = Math.min(Math.max(0, index), this.length - 1);
             speed = typeof speed == 'undefined' ? this.cfg.speed : parseInt(speed);
             endPos = this.getPos(type, index);
-            change = endPos - nowPos, //变化量
-                speed = Math.abs(change) < size ? Math.ceil(Math.abs(change) / size * speed) : speed;
+            change = endPos - nowPos; //变化量
+
+            speed = Math.abs(change) < size ? Math.ceil(Math.abs(change) / size * speed) : speed;
+
+
             if (transition) {
                 css[transition] = direction + ' ease ' + speed + 'ms';
                 css[direction] = endPos + 'px';
@@ -363,22 +370,70 @@
             return this.slide(0);
         },
         prev: function (offset, sync) {
+            if(this.animateLock){
+                return;
+            }
             clearTimeout(this.timer);
             var index = this.index;
+            var len = this.slides.length;
+            var copyItem = null;
+            var insertItem = null;
+            if (index === 0) {
+                copyItem = this.slides[len - 1];
+                insertItem = this.slides[0];
+                this.element.removeChild(copyItem);
+                this.element.insertBefore(copyItem, insertItem);
+                this.refresh();
+                this.element.style[this.cfg.direction] = -this.getOuterWidth(copyItem) + 'px';
+            }
+
+
             offset = typeof offset == 'undefined' ? offset = 1 : offset % this.length;
-            index -= offset;
+
+            if (index === 0) {
+            } else {
+                index -= offset;
+            }
+
+
             if (sync === false) {
                 index = Math.max(index, 0);
             } else {
                 index = index < 0 ? this.length + index : index;
             }
+
+
             return this.slide(index);
         },
         next: function (offset, sync) {
+            if(this.animateLock){
+                return;
+            }
             clearTimeout(this.timer);
             var index = this.index;
+            var len = this.slides.length;
+            var copyItem = null;
+            var insertItem = null;
+            if (index === len - 1) {
+                copyItem = this.slides[0];
+                insertItem = this.slides[len - 1];
+                this.element.removeChild(copyItem);
+                this.element.appendChild(copyItem, insertItem);
+                this.refresh();
+                var tempPos = parseInt(this.element.style[this.cfg.direction], 10);
+                this.element.style[this.cfg.direction] = (tempPos + this.getOuterWidth(copyItem)) + 'px';
+            } else {
+                this.btnFlag = false;
+            }
+
+
             if (typeof offset == 'undefined')offset = 1;
-            index += offset;
+
+            if (index === len - 1) {
+            } else {
+                index += offset;
+            }
+
             if (sync === false) {
                 index = Math.min(index, this.length - 1);
             } else {
@@ -446,7 +501,7 @@
                             off = 1;
                         }
                     }
-                    offset > 0 ? this.prev(off, false) : this.next(off, false);
+                    offset > 0 ? this.prev(off, true) : this.next(off, false);
 
                     this.playing && this.play();
                 }
@@ -462,6 +517,7 @@
                 this.cfg.after.call(this, this.index, this.slides[this.index]);
                 this.playing && this.play();
             }
+            this.animateLock = false;
         },
         refresh: function () {
             if (this.direction == null) {
