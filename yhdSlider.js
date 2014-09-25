@@ -128,8 +128,7 @@
             'before': function () {
             },
             'after': function () {
-            },
-            'continuous': true//是否连续
+            }
         },
         //设置OR获取节点样式
         css: function (elem, css) {
