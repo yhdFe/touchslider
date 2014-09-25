@@ -5,7 +5,6 @@
     'auto': true, //bool 是否自动播放
     'speed':600, //Number 动画效果持续时间,单位是毫秒
     'timeout':5000, //Number 幻灯播放间隔时间,单位毫秒
-    'direction':'left', //string left|right|up|down 播放方向,四个值可选
     'align':'center', //string left|center|right 对齐方向（fixWidth=true情况下无效），靠左对齐（ipad版appStore上截图展现方式）、居中对齐（iphone版appStore上截图展现方式）、靠右对齐
     'fixWidth':true, //bool 默认会将每个幻灯宽度强制固定为容器的宽度,即每次只能看到一张幻灯；false的情况参见下方第一个例子
     'mouseWheel':false, //bool 是否支持鼠标滚轮
@@ -31,6 +30,7 @@
 
     'use strict';
 
+    //是否支持touch判断
     var hasTouch = ('createTouch' in document) || ('ontouchstart' in window),
         testStyle = document.createElement('div').style,
         testVendor = (function () {
@@ -89,6 +89,7 @@
         },
         transitionend = testVendor[1] || '',
 
+    //构造器
         TouchSlider = function (id, cfg) {
             if (!(this instanceof TouchSlider)) {
                 return new TouchSlider(id, cfg);
@@ -213,6 +214,7 @@
                 endEvent = Touch ? 'touchend' : 'mouseup';
 
             this.slides = children(this.element);
+            this.cacheSlides = children(this.element);
             this.length = this.slides.length;
             this.cfg.timeout = parseInt(this.cfg.timeout);
             this.cfg.speed = parseInt(this.cfg.speed);
@@ -225,21 +227,9 @@
 
             if (this.length < 1)return false;
 
+            this.direction = this.direction || 'left';
+            this.vertical = 0;
 
-            switch (this.cfg.direction) {
-                case 'up':
-                case 'down':
-                    this.direction = this.cfg.direction;
-                    this.vertical = 1;
-                    break;
-                case 'right':
-                    this.direction = 'right';
-                    break;
-                default:
-                    this.direction = this.direction || 'left';
-                    this.vertical = 0;
-                    break;
-            }
 
             this.addListener(this.element, startEvent, this.bind(this._start, this), false);
             this.addListener(document, moveEvent, this.bind(this._move, this), false);
@@ -268,17 +258,10 @@
         },
         getPos: function (type, index) {
             var _type = toCase('-' + type),
-                myWidth = this.getSum(type, index, index + 1),
                 sum = this.getSum(type, 0, index) + this['getOuter' + _type](this.element) / 2 - this['get' + _type](this.element) / 2;
 
-            switch (this.cfg.align) {
-                case 'left':
-                    return -sum;
-                case 'right':
-                    return this[type] - myWidth - sum;
-                default:
-                    return (this[type] - myWidth) / 2 - sum;
-            }
+            return -sum;
+
         },
         resize: function () {
             clearTimeout(this.aniTimer);
@@ -308,6 +291,20 @@
             this.playing && this.play();
             return this;
         },
+
+        go:function(index){
+            var cur = this.cacheSlides[index];
+            var curIndex = index;
+            each(this.slides,function(i,type){
+                if(cur===type){
+                    curIndex = i;
+                }
+            });
+
+            this.slide(curIndex);
+        },
+
+
         slide: function (index, speed) {
             this.animateLock = true;
             var direction = sg[this.vertical][1],
@@ -356,7 +353,7 @@
             clearTimeout(this.timer);
             this.playing = true;
             this.timer = setTimeout(this.bind(function () {
-                this.direction == 'left' || this.direction == 'up' ? this.next() : this.prev();
+                this.next();
             }, this), this.cfg.timeout);
             return this;
         },
@@ -468,7 +465,7 @@
                     this.element.insertBefore(copyItem, insertItem);
                     this.refresh();
                     this._pos = -this.getOuterWidth(copyItem);
-                } else if (!this.tempCreate&&(this.index === len - 1)) {
+                } else if (!this.tempCreate && (this.index === len - 1)) {
                     this.tempCreate = true;
                     copyItem = this.slides[0];
                     insertItem = this.slides[len - 1];
@@ -480,7 +477,6 @@
                 }
 
                 this.element.style[direction] = this._pos + offset + 'px';
-
 
 
                 if (window.getSelection != null) {
