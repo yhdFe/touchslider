@@ -18,6 +18,7 @@
  slider.play();//开始播放
  slider.prev();//上一张
  slider.next();//下一张
+ slider.go();//跳转到第几张
  slider.stop();//停止播放（暂停并回到第一张）
  slider.append(newLi);//末尾添加一个幻灯项，参考下边第二个幻灯示例
  slider.prepend(newLi);//开头添加一个幻灯项
